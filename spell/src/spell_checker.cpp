@@ -10,7 +10,8 @@ namespace spell_checker
 {
    using namespace spell_checker::algorithm;
 
-   string check(const unordered_set<string_view>& lookup, const vector<string_view>& vocabulary, string_view word, const CharMatchPolicy& charMatchPolicy)
+   string check(const unordered_set<string_view>& lookup, const vector<string_view>& vocabulary, string_view word,
+                const CharMatchPolicy& charMatchPolicy)
    {
       // fast path, exact match
       if (lookup.find(word) != lookup.cend())
@@ -42,13 +43,15 @@ namespace spell_checker
    }
 
    SpellChecker::SpellChecker(string_view inputSeq, char sep, string_view term, CharMatchPolicy charMatchPolicy) :
-         pImpl{std::make_unique<SpellCheckerImpl>(inputSeq, sep, term, std::move(charMatchPolicy))}
-      {}
+      pImpl{std::make_unique<SpellCheckerImpl>(inputSeq, sep, term, std::move(charMatchPolicy))}
+   {}
+
+   SpellChecker::~SpellChecker() = default;
 
    class SpellChecker::SpellCheckerImpl
    {
    public:
-      explicit SpellCheckerImpl(string_view inputSeq, char sep, string_view term,CharMatchPolicy&& charMatchPolicy) :
+      explicit SpellCheckerImpl(string_view inputSeq, char sep, string_view term, CharMatchPolicy&& charMatchPolicy) :
          charMatchPolicy(std::move(charMatchPolicy))
       {
          auto it = tokenize(inputSeq.cbegin(), inputSeq.cend(), inserter(vocLinear, vocLinear.begin()), sep, term);
@@ -58,7 +61,7 @@ namespace spell_checker
          vocLookup.insert(vocLinear.cbegin(), vocLinear.cend());
       }
 
-      string check()
+      string check() const
       {
          string r;
 
@@ -77,7 +80,7 @@ namespace spell_checker
       unordered_set<string_view> vocLookup; // for fast lookup for exact matches
    };
 
-   string SpellChecker::check()
+   string SpellChecker::check() const
    {
       return pImpl->check();
    }

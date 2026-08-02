@@ -20,9 +20,12 @@ namespace spell_checker
    class SpellChecker
    {
    public:
-      explicit SpellChecker(string_view inputSeq, char sep = ' ', string_view term = "===", CharMatchPolicy charMatchPolicy = CaseInsensitiveMatch{});
+      explicit SpellChecker(string_view inputSeq, char sep = ' ',
+                            string_view term = "===", CharMatchPolicy charMatchPolicy = CaseInsensitiveMatch{});
+      ~SpellChecker();
 
-      string check();
+      string check() const;
+
    private:
       class SpellCheckerImpl;
       unique_ptr<SpellCheckerImpl> pImpl;

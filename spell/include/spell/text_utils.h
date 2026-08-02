@@ -16,7 +16,8 @@ namespace spell_checker::text
    {
       inline bool operator()(char a, char b) const
       {
-         return static_cast<unsigned char>(std::tolower(a)) == static_cast<unsigned char>(std::tolower(b)); // todo to match also non-printable binary data
+         return static_cast<unsigned char>(std::tolower(a))
+             == static_cast<unsigned char>(std::tolower(b)); // todo to match also non-printable binary data
       }
    };
 

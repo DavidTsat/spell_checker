@@ -11,9 +11,8 @@ namespace spell_checker::algorithm
       using std::memset;
       using std::min;
       using std::out_of_range;
-      using std::string_view;
-      
-      template<typename Policy>
+
+      template <typename Policy>
       int distImpl(string_view a, string_view b, const Policy& policy)
       {
          if (a.size() > MAX_LEN || b.size() > MAX_LEN)
@@ -25,9 +24,9 @@ namespace spell_checker::algorithm
          // to reuse the same 50x50 every time or at least comment it?
          uint8_t dp[MAX_LEN + 1][MAX_LEN + 1][3]; // VLA or MAX_LEN ?
 
-   #ifdef DEBUG
+#ifdef DEBUG
          uint8_t parent[a.size() + 1][b.size() + 1][3]{INF};
-   #endif
+#endif
          memset(dp, INF, sizeof(dp));
          dp[0][0][MATCH_OR_SUBST] = 0;
 
@@ -69,8 +68,8 @@ namespace spell_checker::algorithm
 
          int distance = min({dp[a_size][b_size][MATCH_OR_SUBST], dp[a_size][b_size][INSERT], dp[a_size][b_size][DELETE]});
          return distance > 2 ? -1 : distance;
-      }   
-   }
+      }
+   } // namespace
 
    // to test transitivity as well
    int dist(string_view a, string_view b, CharMatchPolicy matcher)
