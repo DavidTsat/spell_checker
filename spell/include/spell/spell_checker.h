@@ -1,20 +1,30 @@
 #pragma once
+#include "spell/text_utils.h"
 
 #include <string>
 #include <string_view>
 #include <unordered_set>
+#include <memory>
 
 namespace spell_checker
 {
+   using namespace spell_checker::text;
+
    using std::string;
    using std::string_view;
+   using std::unique_ptr;
    using std::unordered_set;
 
-   string check(const unordered_set<string_view>& voc, string_view w);
+   string check(const unordered_set<string_view>& lookup, const vector<string_view>& vocabulary, string_view word);
 
    class SpellChecker
    {
    public:
-      static string check(string_view s, char sep = ' ', string_view = "===");
+      explicit SpellChecker(string_view inputSeq, char sep = ' ', string_view term = "===", CharMatchPolicy charMatchPolicy = CaseInsensitiveMatch{});
+
+      string check();
+   private:
+      class SpellCheckerImpl;
+      unique_ptr<SpellCheckerImpl> pImpl;
    };
 } // namespace spell_checker

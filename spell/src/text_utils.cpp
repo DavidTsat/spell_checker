@@ -17,7 +17,7 @@ namespace spell_checker::text
          }
 
          if (vec.size() > 1)
-            return '{' + res + '}'; // the order may not be preserved
+            return '{' + res + '}';
          return res;
       };
 
