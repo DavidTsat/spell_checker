@@ -13,8 +13,8 @@ Throws std::out_of_range if the length of the words is greater than MAX_LEN (50)
 To fullfill this constraint, the algorithm uses a 3D dynamic programming matrix, where the third dimension represents the last operation performed (match/substitution, insertion, deletion).
 The 3-rd dimension being a small state machine, doesn't allow transitions from insertion to insertion or deletion to deletion, thus preventing two consecutive insertions or deletions.
 The time complexity is O(n*m) (strictly speaking O(n*m*3)), where n and m are the lengths of the input strings. 
-A drawback is that the algorithm doesn't have an early stop, that is, even if the distance is already greater than 2, it will continue to compute the entire matrix and return -1 at the end. This can be optimized.
-Besides, a natural improvement will be to consider not only ASCII characters, but also both Latin1 and non printable, for that the library code should be changed (to improve and make it injectable from the application) and a new  CharMatchPolicy should be implemented.**
+The algorithm doesn't have an early stop, that is, even if the distance is already greater than 2, it will continue to consume the rest of the letters and compute the entire matrix and return -1 at the end. This can be optimized.   
+Besides, a natural improvement will be to consider not only ASCII characters, but also both Latin1 and non printable. Ror that the library code should be enhanced (to improve and make it injectable from the application) and a new CharMatchPolicy should be implemented, also the library must be rebuilt.**
 
 ```
 The structure is as follows:
