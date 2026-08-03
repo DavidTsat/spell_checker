@@ -85,6 +85,55 @@ namespace
       cout << "All dist tests passed!\n";
    }
 
+   void testPrePostProcessor()
+   {
+      auto testPrePostProcessorBasic =
+         [](const auto& processor, string_view toPrep, string_view preprocessed, string_view postprocessed)
+      {
+         auto [prepOut, prefix] = processor.preprocess(toPrep);
+         assert(prepOut == preprocessed);
+         auto postOut = processor.postprocess(prefix, prepOut);
+         assert(postOut == postprocessed);
+      };
+
+      LTrimWhitespace processor;
+      testPrePostProcessorBasic(processor, "     abc", "abc", "     abc");
+      testPrePostProcessorBasic(processor, "\tabc", "abc", "\tabc");
+      testPrePostProcessorBasic(processor, "\nabc", "abc", "\nabc");
+      testPrePostProcessorBasic(processor, "\rabc", "abc", "\rabc");
+      testPrePostProcessorBasic(processor, "\fabc", "abc", "\fabc");
+      testPrePostProcessorBasic(processor, "\vabc", "abc", "\vabc");
+      testPrePostProcessorBasic(processor, " \t\n\r\f\vabc", "abc", " \t\n\r\f\vabc"); // mixed
+
+      cout << "All pre and post processor tests passed!\n";
+   }
+
+   void testFormat()
+   {
+      auto testFormatBasic = [](auto beg1, auto end1, auto beg2, auto end2, const string& expectedOut)
+      { assert(expectedOut == format(beg1, end1, beg2, end2, ' ')); };
+
+      vector<string_view> v1({"abc", "cde", "aaaa"});
+      vector<string_view> v2({"mmm", "qqq", "ttttt"});
+      testFormatBasic(v1.cbegin(), v1.cend(), v2.cbegin(), v2.cend(), "{abc cde aaaa}"); // only the first one must be considered
+      testFormatBasic(v2.cbegin(), v2.cend(), v1.cbegin(), v1.cend(), "{mmm qqq ttttt}"); // the opposite
+
+      v1 = {};
+      testFormatBasic(v1.cbegin(), v1.cend(), v2.cbegin(), v2.cend(), "{mmm qqq ttttt}");
+
+      v1.swap(v2);
+      testFormatBasic(v1.cbegin(), v1.cend(), v2.cbegin(), v2.cend(), "{mmm qqq ttttt}");
+
+      v1 = {};
+      testFormatBasic(v1.cbegin(), v1.cend(), v2.cbegin(), v2.cend(), "");
+
+      v1 = {"aaaaa"};
+      testFormatBasic(v1.cbegin(), v1.cend(), v2.cbegin(), v2.cend(), "aaaaa");
+
+      v1.swap(v2);
+      testFormatBasic(v1.cbegin(), v1.cend(), v2.cbegin(), v2.cend(), "aaaaa");
+   }
+
    void testTokenize()
    {
       struct TestTokenizeBasic
@@ -100,11 +149,6 @@ namespace
 
             assert(voc == expectedVoc);
             assert(words == expectedWords);
-         }
-
-         void operator()(string_view input)
-         {
-
          }
       } testTokenizeBasic;
 
@@ -133,6 +177,8 @@ namespace
 int main()
 {
    testDist();
+   testPrePostProcessor();
+   testFormat();
    testTokenize();
 
    return 0;

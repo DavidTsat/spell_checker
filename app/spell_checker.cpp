@@ -8,10 +8,12 @@
 namespace spell_checker
 {
    using namespace spell::algorithm;
+   using namespace spell::text;
+
    using std::move;
 
    template <typename wordProcesor, typename WordPostProcessor>
-   string checkImpl(const unordered_set<string_view>& lookup, const vector<string_view>& vocabulary, string_view word, WordPostProcessor processor)
+   string checkImpl(const unordered_set<string_view>& lookup, const vector<string_view>& vocabulary, string_view word, WordPostProcessor processor, char sep)
    {
       // fast path, exact match
       if (lookup.find(word) != lookup.cend())
@@ -39,7 +41,7 @@ namespace spell_checker
             d2.push_back(move(res));
       }
 
-      string res = format(d1.cbegin(), d1.cend(), d2.cbegin(), d2.cend());
+      string res = format(d1.cbegin(), d1.cend(), d2.cbegin(), d2.cend(), sep);
       if (res.empty())
          return '{' + string(word) + "?}"; // no match
 
@@ -76,7 +78,7 @@ namespace spell_checker
          {
             using std::prev;
 
-            r += checkImpl<LTrimWhitespace>(mVocLookup, mVocLinear, *it, LTrimWhitespace{});
+            r += checkImpl<LTrimWhitespace>(mVocLookup, mVocLinear, *it, LTrimWhitespace{}, mSep);
             if (it != prev(mWords.cend()))
                r += mSep;
          }

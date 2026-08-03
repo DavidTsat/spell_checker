@@ -62,14 +62,14 @@ namespace spell::text
    };
 
    template <typename InIt>
-   string format(InIt beginD1, InIt endD1, InIt beginD2, InIt endD2)
+   string format(InIt beginD1, InIt endD1, InIt beginD2, InIt endD2, char sep)
    {
-      auto join = [](InIt begin, InIt end, char sep) -> auto
+      auto join = [](InIt begin, InIt end, string sep) -> auto
       {
          if (begin == end)
             return string{};
 
-         auto res{*begin};
+         string res{*begin};
          for (auto it = next(begin); it != end; ++it)
          {
             res += sep;
@@ -81,11 +81,11 @@ namespace spell::text
          return res;
       };
 
-      string res{join(beginD1, endD1, ' ')};
+      string res{join(beginD1, endD1, string(1, sep))};
       if (!res.empty())
          return res;
 
-      return join(beginD2, endD2, ' ');
+      return join(beginD2, endD2, string(1, sep));
    }
 
    template <typename InIt, typename OutIt>
