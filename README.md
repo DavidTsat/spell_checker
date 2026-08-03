@@ -6,7 +6,7 @@ Two consecutive insertions or deletions are not allowed.
 The result is -1 if the distance is greater than 2.
 Throws std::out_of_range if the length of the words is greater than MAX_LEN (50).
 
-**The algorithm's core concept is based on Lavenshtein distance, but with the additional constraint that two consecutive insertions or deletions are not allowed.
+**The algorithm's core concept is based on Lavenshtein distance https://en.wikipedia.org/wiki/Levenshtein_distance, but with the additional constraint that two consecutive insertions or deletions are not allowed.
 To fullfill this constraint, the algorithm uses a 3D dynamic programming matrix, where the third dimension represents the last operation performed (match/substitution, insertion, deletion).
 The 3-rd dimension being a small state machine, doesn't allow transitions from insertion to insertion or deletion to deletion, thus preventing two consecutive insertions or deletions.
 The time complexity is O(n*m) (strictly speaking O(n*m*3)), where n and m are the lengths of the input strings. 
