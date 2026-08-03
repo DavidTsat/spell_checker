@@ -43,18 +43,18 @@ The structure is as follows:
 
 The library exposes also the following functions from spell::debug_utils namespace:     
 1.     
-'''
+```
    template <typename InIt>
    string format(InIt beginD1, InIt endD1, InIt beginD2, InIt endD2, char sep)
 Given two pair of begin and end iterators and a char separator the function iterates over the given sequences and produces a string output:
-'''
+```
 If the first sequence is non-empty, the second one is ignored, otherwise the second one only is used. 
 If only a single element is contained in the chosen sequence, the output is padded with single opening and closing {} brackets, e.g. "{output}".
 2.     
-'''
+```
    template <typename InIt, typename OutIt>
    InIt tokenize(InIt first, InIt last, OutIt dest, char sep, string_view term)
-'''
+```
 Given an input sequence, and an output iterator, the tokenize function iterates over the input sequence, separated by the "sep" character, splits into single words and writes to the output iterator until the terminal sequence "term" is reached or the input sequence is exhausted (iterated till "last").        
              
 The library code is under "spell".          
@@ -62,30 +62,30 @@ The application code is placed under "app". Application is built into two parts:
 
      
 Example usage (can be found in app/main.cpp):
-'''
+```
 SpellChecker checker{"rain spain plain plaint pain main mainly the in on fall falls his was===hte rame in pain fells "
                        "mainy    oon teh lain was hints pliant==="};
                        
 checker.check(); 
-'''
+```
 "checker.check();" must produce "the {rame?} in pain falls {main mainly}    on the plain was {hints?} plaint".     
        
 There are two more components: app_test and lib_test for unit tests (to migrate to gtests) under "./test". Both are built as (independent) executables and must be used and enhanced after each and every change to validate the expected results.              
 
 To build the whole project please do:    
-'''
+```
 mkdir build &&
 cd build &&
 cmake .. &&
 cmake --build . --clean-first"
-'''
+```
 Separate components can be built separately by:   
-'''
+```
 cmake --build . --clean-first --target spell
 cmake --build . --clean-first --target spell_app
 cmake --build . --clean-first --target spell_lib_tests
 cmake --build . --clean-first --target spell_app_tests
-'''
+```
 
 After building please execute the unit tests (from the build directory) later:    
 ./test/app_test/spell_app_tests   
