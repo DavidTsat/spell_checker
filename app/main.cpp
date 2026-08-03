@@ -1,4 +1,4 @@
-#include "spell/spell_checker.h"
+#include "spell_checker.h"
 
 #define DEBUG
 

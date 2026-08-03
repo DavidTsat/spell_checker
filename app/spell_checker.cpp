@@ -1,6 +1,6 @@
-#include "spell/spell_checker.h"
 #include "spell/algorithm.h"
 
+#include "spell_checker.h"
 #ifdef DEBUG
 #include "spell/debug_utils.h"
 #endif

@@ -1,5 +1,4 @@
 add_library(spell
-    src/spell_checker.cpp
     src/algorithm.cpp
     src/text_utils.cpp
 )

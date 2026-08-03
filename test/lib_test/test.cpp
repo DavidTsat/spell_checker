@@ -1,4 +1,3 @@
-#include "spell/spell_checker.h"
 #include "spell/algorithm.h"
 #include "spell/text_utils.h"
 
@@ -7,7 +6,6 @@
 
 namespace
 {
-   using namespace spell_checker;
    using namespace spell_checker::algorithm;
    using namespace spell_checker::text;
 
