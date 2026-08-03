@@ -1,6 +1,9 @@
 A basic spell checker library and a client application.
 
-The library (built as a static library libspell.a) exposes a custom distance function between given two string arguments (and an optional policy either case sensitive matching, or not, by default the comparison between individual characters are case insensitive).
+The library (built as a static library libspell.a) exposes a custom distance function between given two string arguments (and an optional policy either case sensitive matching, or not, by default the comparison between individual characters are case insensitive) from the spell::algorithm namespace:          
+```
+int dist(string_view a, string_view b, CharMatchPolicy charMatchPolicy = CaseInsensitiveMatch{});
+```
 Allowed operations: insertion, deletion, substitution (subtitution is counted as 2 operations: deletion + insertion).    
 Two consecutive insertions or deletions are not allowed.
 The result is -1 if the distance is greater than 2.
@@ -49,7 +52,7 @@ The library exposes also the following functions from spell::debug_utils namespa
 Given two pair of begin and end iterators and a char separator the function iterates over the given sequences and produces a string output:
 ```
 If the first sequence is non-empty, the second one is ignored, otherwise the second one only is used. 
-If only a single element is contained in the chosen sequence, the output is padded with single opening and closing {} brackets, e.g. "{output}".
+If only a single element is contained in the chosen sequence, the output is padded with single opening and closing {} brackets, e.g. "{output}".     
 2.     
 ```
    template <typename InIt, typename OutIt>
