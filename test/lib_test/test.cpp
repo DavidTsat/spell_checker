@@ -3,13 +3,17 @@
 
 #include <iostream>
 #include <cassert>
+#include <unordered_set>
 
 namespace
 {
-   using namespace spell_checker::algorithm;
-   using namespace spell_checker::text;
+   using namespace spell::algorithm;
+   using namespace spell::text;
 
+   using std::back_inserter;
    using std::cout;
+   using std::inserter;
+   using std::vector;
 
    void testDist()
    {
@@ -80,12 +84,56 @@ namespace
 
       cout << "All dist tests passed!\n";
    }
+
+   void testTokenize()
+   {
+      struct TestTokenizeBasic
+      {
+         void operator()(string_view input, char sep, string_view term, const vector<string_view>& expectedVoc,
+                         const vector<string_view>& expectedWords)
+         {
+            vector<string_view> voc;
+            vector<string_view> words;
+
+            auto it = tokenize(input.cbegin(), input.cend(), back_inserter(voc), sep, term);
+            auto endIt = tokenize(it, input.cend(), back_inserter(words), sep, term);
+
+            assert(voc == expectedVoc);
+            assert(words == expectedWords);
+         }
+
+         void operator()(string_view input)
+         {
+
+         }
+      } testTokenizeBasic;
+
+      testTokenizeBasic(
+         "rain spain plain plaint pain main mainly the in on fall falls his was===hte rame in pain fells "
+         "mainy    oon teh lain was hints pliant===",
+         ' ', "===",
+         {"rain", "spain", "plain", "plaint", "pain", "main", "mainly", "the", "in", "on", "fall", "falls", "his", "was"},
+         {"hte", "rame", "in", "pain", "fells", "mainy", "   oon", "teh", "lain", "was", "hints", "pliant"});
+
+      testTokenizeBasic(
+         "rain,spain,plain,plaint,pain,main,mainly,the,in,on,fall,falls,his,was------hte,rame,in,pain,fells,"
+         "mainy,    oon,teh,lain,was,hints,pliant------",
+         ',', "------",
+         {"rain", "spain", "plain", "plaint", "pain", "main", "mainly", "the", "in", "on", "fall", "falls", "his", "was"},
+         {"hte", "rame", "in", "pain", "fells", "mainy", "    oon", "teh", "lain", "was", "hints", "pliant"});
+
+      testTokenizeBasic("hello === ===", ' ', "===", {"hello"}, {});
+      testTokenizeBasic("======", ' ', "===", {}, {});
+
+      cout << "All tokenize tests passed!\n";
+   }
 } // namespace
 
 // change it to gtests
 int main()
 {
    testDist();
+   testTokenize();
 
    return 0;
 }

@@ -8,7 +8,7 @@
 
 namespace spell_checker
 {
-   using namespace spell_checker::text;
+   using namespace spell::text;
 
    using std::string;
    using std::string_view;
@@ -20,8 +20,7 @@ namespace spell_checker
    class SpellChecker
    {
    public:
-      explicit SpellChecker(string_view inputSeq, char sep = ' ',
-                            string_view term = "===", CharMatchPolicy charMatchPolicy = CaseInsensitiveMatch{});
+      explicit SpellChecker(string_view inputSeq, char sep = ' ', string_view term = "===");
       ~SpellChecker();
 
       string check() const;

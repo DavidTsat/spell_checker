@@ -5,19 +5,22 @@
 #include <vector>
 #include <variant>
 
-namespace spell_checker::text
+namespace spell::text
 {
    using std::string;
    using std::string_view;
    using std::vector;
-
+   using std::tolower;
+   using std::next;
+   using std::distance;
+   
    // as this is called for every character, we better not to use type-erased polymorphic std::function or  an interface with a virtual comparator function
    struct CaseInsensitiveMatch
    {
       inline bool operator()(char a, char b) const
       {
-         return static_cast<unsigned char>(std::tolower(a))
-             == static_cast<unsigned char>(std::tolower(b)); // todo to match also non-printable binary data
+         return static_cast<unsigned char>(tolower(a))
+             == static_cast<unsigned char>(tolower(b)); // todo to match also non-printable binary data either here, or introduce a new policy
       }
    };
 
@@ -32,20 +35,71 @@ namespace spell_checker::text
 
    using CharMatchPolicy = std::variant<struct CaseInsensitiveMatch, struct CaseSensitiveMatch>;
 
-   // can be generic
-   string format(const vector<string_view>& d1, const vector<string_view>& d2);
+   // pre and post processor: left trim whitespaces
+   struct LTrimWhitespace
+   {
+      struct Result
+      {
+         string_view trimmed;
+         string_view prefix;
+      };
 
-   using InIt = string_view::const_iterator;
-   template <typename OutIt>
+      Result preprocess(string_view word) const
+      {
+         static constexpr const char* whitespace = " \t\n\r\f\v";
+
+         auto begin = word.find_first_not_of(whitespace);
+         if (begin == string_view::npos)
+            return {};
+
+         return {word.substr(begin), word.substr(0, begin)};
+      }
+
+      string postprocess(string_view prefix, string_view word) const
+      {
+         return string(prefix) + string(word);
+      }
+   };
+
+   template <typename InIt>
+   string format(InIt beginD1, InIt endD1, InIt beginD2, InIt endD2)
+   {
+      auto join = [](InIt begin, InIt end, char sep) -> auto
+      {
+         if (begin == end)
+            return string{};
+
+         auto res{*begin};
+         for (auto it = next(begin); it != end; ++it)
+         {
+            res += sep;
+            res += *it;
+         }
+
+         if (distance(begin, end) > 1)
+            return '{' + res + '}';
+         return res;
+      };
+
+      string res{join(beginD1, endD1, ' ')};
+      if (!res.empty())
+         return res;
+
+      return join(beginD2, endD2, ' ');
+   }
+
+   template <typename InIt, typename OutIt>
    InIt tokenize(InIt first, InIt last, OutIt dest, char sep, string_view term)
    {
       while (first != last)
       {
-         // skip over separators
-         while (first != last && *first == sep)
+         // skip over one separator
+         if (first != last && *first == sep)
             ++first;
 
          InIt f2 = first;
+         while (f2 != last && *f2 == sep)
+            ++f2;
          while (f2 != last && *f2 != sep)
             ++f2;
 
@@ -66,4 +120,4 @@ namespace spell_checker::text
 
       return first;
    }
-} // namespace spell_checker::text
+} // namespace spell::text

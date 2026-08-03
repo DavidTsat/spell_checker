@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstring>
 
-namespace spell_checker::algorithm
+namespace spell::algorithm
 {
    // anonymous namespace to hide the implementation details
    namespace
@@ -12,8 +12,8 @@ namespace spell_checker::algorithm
       using std::min;
       using std::out_of_range;
 
-      template <typename Policy>
-      int distImpl(string_view a, string_view b, const Policy& policy)
+      template <typename CharMatchPolicy>
+      int distImpl(string_view a, string_view b, const CharMatchPolicy& matchPolicy)
       {
          if (a.size() > MAX_LEN || b.size() > MAX_LEN)
             throw out_of_range("Exceeding maximum allowed word length");
@@ -25,8 +25,9 @@ namespace spell_checker::algorithm
          uint8_t dp[MAX_LEN + 1][MAX_LEN + 1][3]; // VLA or MAX_LEN ?
 
 #ifdef DEBUG
-         uint8_t parent[a.size() + 1][b.size() + 1][3]{INF};
+         uint8_t parent[a.size() + 1][b.size() + 1][3]{INF}; // to backtrack the operations and positions
 #endif
+
          memset(dp, INF, sizeof(dp));
          dp[0][0][MATCH_OR_SUBST] = 0;
 
@@ -46,7 +47,7 @@ namespace spell_checker::algorithm
             for (int j = 1; j <= b_size; ++j)
             {
                // subst costs 2: delete + insert
-               uint8_t cost = (policy(a[i - 1], b[j - 1])) ? 0 : 2;
+               uint8_t cost = (matchPolicy(a[i - 1], b[j - 1])) ? 0 : 2;
 
                // prev state can be anything
                uint8_t subs0 = dp[i - 1][j - 1][MATCH_OR_SUBST] + cost;
@@ -71,11 +72,10 @@ namespace spell_checker::algorithm
       }
    } // namespace
 
-   // to test transitivity as well
    int dist(string_view a, string_view b, CharMatchPolicy matcher)
    {
       using std::visit;
       // std::visit must not be called inside the implementation of distImpl, otherwise it would be called for every character
       return visit([&](const auto& policy) { return distImpl(a, b, policy); }, matcher);
    }
-} // namespace spell_checker::algorithm
+} // namespace spell::algorithm

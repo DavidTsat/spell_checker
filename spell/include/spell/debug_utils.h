@@ -4,7 +4,7 @@
 #include <string_view>
 #include <iostream>
 
-namespace spell_checker::debug_utils
+namespace spell::debug_utils
 {
    using std::cout;
    using std::endl;
@@ -14,19 +14,10 @@ namespace spell_checker::debug_utils
    template <typename Cont>
    void printCont(string_view name, const Cont& cont)
    {
-      struct printer: Cont
-      {
-         void print(string_view name) const
-         {
-            cout << "name: " << name << endl;
-            for (const auto& a : *this)
-               cout << a << ',';
-            cout << endl;
-         }
-      };
-
-      static_cast<const printer&>(cont).print(name);
+      for (const auto& a : cont)
+         cout << a << ',';
+      cout << endl;
    }
-} // namespace spell_checker::debug_utils
+} // namespace spell::debug_utils
 
 #endif

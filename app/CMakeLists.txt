@@ -21,3 +21,8 @@ target_link_libraries(spell_app
     PRIVATE
         spell_app_lib
 )
+
+target_compile_options(spell_app_lib PRIVATE
+    -g3
+    -O0
+)

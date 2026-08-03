@@ -4,9 +4,9 @@
 #include <string_view>
 #include <cstdint>
 
-namespace spell_checker::algorithm
+namespace spell::algorithm
 {
-   using namespace spell_checker::text;
+   using namespace spell::text;
 
    using std::string_view;
 
@@ -29,4 +29,4 @@ namespace spell_checker::algorithm
       * that is, even if the distance is already greater than 2, it will continue to compute the entire matrix and return -1 at the end. This can be optimized.
    */
    int dist(string_view a, string_view b, CharMatchPolicy charMatchPolicy = CaseInsensitiveMatch{});
-} // namespace spell_checker::algorithm
+} // namespace spell::algorithm
