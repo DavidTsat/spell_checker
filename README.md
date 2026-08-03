@@ -12,6 +12,32 @@ The 3-rd dimension being a small state machine, doesn't allow transitions from i
 The time complexity is O(n*m) (strictly speaking O(n*m*3)), where n and m are the lengths of the. A drawback is that the algorithm doesn't have an early stop,
 that is, even if the distance is already greater than 2, it will continue to compute the entire matrix and return -1 at the end. This can be optimized.
 
+The structure is as follows:
+├── app
+│   ├── CMakeLists.txt
+│   ├── main.cpp
+│   ├── spell_checker.cpp
+│   └── spell_checker.h
+├── CMakeLists.txt
+├── README.md
+├── spell
+│   ├── CMakeLists.txt
+│   ├── include
+│   │   └── spell
+│   │       ├── algorithm.h
+│   │       ├── debug_utils.h
+│   │       └── text_utils.h
+│   └── src
+│       └── algorithm.cpp
+└── test
+    ├── app_test
+    │   ├── CMakeLists.txt
+    │   └── test.cpp
+    ├── CMakeLists.txt
+    └── lib_test
+        ├── CMakeLists.txt
+        └── test.cpp
+        
 The library exposes also the following functions from spell::debug_utils namespace:
 1.
    template <typename InIt>
