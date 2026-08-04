@@ -80,7 +80,7 @@ To build the whole project please do:
 mkdir build &&
 cd build &&
 cmake .. &&
-cmake --build . --clean-first"
+cmake --build . --clean-first
 ```
 Separate components can be built separately by:   
 ```
@@ -90,7 +90,7 @@ cmake --build . --clean-first --target spell_lib_tests
 cmake --build . --clean-first --target spell_app_tests
 ```
 
-After building please execute the unit tests (from the build directory) later:    
+After building please execute the unit tests (from the build directory):    
 ./test/app_test/spell_app_tests   
 and   
 ./test/lib_test/spell_lib_tests   
