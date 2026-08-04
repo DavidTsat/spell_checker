@@ -1,6 +1,9 @@
 #include "spell_checker.h"
 #include "spell/algorithm.h"
 
+#include <vector>
+#include <unordered_set>
+
 #ifdef DEBUG
 #include "spell/debug_utils.h"
 #endif
@@ -10,10 +13,9 @@ namespace spell_checker
    using namespace spell::algorithm;
    using namespace spell::text;
 
-   using std::move;
-
-   template <typename wordProcesor, typename WordPostProcessor>
-   string checkImpl(const unordered_set<string_view>& lookup, const vector<string_view>& vocabulary, string_view word, WordPostProcessor processor, char sep)
+   template <typename WordProcesor>
+   string checkImpl(const unordered_set<string_view>& lookup, const vector<string_view>& vocabulary, string_view word,
+                    WordProcesor processor, char sep)
    {
       // fast path, exact match
       if (lookup.find(word) != lookup.cend())
@@ -34,14 +36,14 @@ namespace spell_checker
          if (d == -1)
             continue;
 
-         string res = processor.postprocess(prefix, vocWord);
+         string res{processor.postprocess(prefix, vocWord)};
          if (d == 1)
             d1.push_back(move(res));
          else // d == 2
             d2.push_back(move(res));
       }
 
-      string res = format(d1.cbegin(), d1.cend(), d2.cbegin(), d2.cend(), sep);
+      string res{format(d1.cbegin(), d1.cend(), d2.cbegin(), d2.cend(), sep)};
       if (res.empty())
          return '{' + string(word) + "?}"; // no match
 
@@ -57,13 +59,14 @@ namespace spell_checker
    class SpellChecker::SpellCheckerImpl
    {
    public:
-      explicit SpellCheckerImpl(string_view inputSeq, char sep, string_view term) : mSep(sep)
+      explicit SpellCheckerImpl(string_view inputSeq, char sep, string_view term) :
+         mSep(sep)
       {
-         auto it = tokenize(inputSeq.cbegin(), inputSeq.cend(), back_inserter(mVocLinear), mSep, term);
-         auto endIt = tokenize(it, inputSeq.cend(), back_inserter(mWords), mSep, term);
+         auto it{tokenize(inputSeq.cbegin(), inputSeq.cend(), back_inserter(mVocLinear), mSep, term)};
+         auto endIt{tokenize(it, inputSeq.cend(), back_inserter(mWords), mSep, term)};
 
 #ifdef DEBUG
-         //todo
+         // todo
 #endif
 
          // todo: to check the returned values
@@ -76,8 +79,6 @@ namespace spell_checker
          string r;
          for (auto it = mWords.cbegin(); it != mWords.cend(); ++it)
          {
-            using std::prev;
-
             r += checkImpl<LTrimWhitespace>(mVocLookup, mVocLinear, *it, LTrimWhitespace{}, mSep);
             if (it != prev(mWords.cend()))
                r += mSep;

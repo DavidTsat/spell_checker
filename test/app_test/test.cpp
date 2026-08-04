@@ -7,10 +7,7 @@
 namespace
 {
    using namespace spell_checker;
-
-   using std::cout;
-   using std::string;
-   using std::string_view;
+   using namespace std;
 
    void spellCheckerTest()
    {

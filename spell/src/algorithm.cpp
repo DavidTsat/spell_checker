@@ -8,9 +8,10 @@ namespace spell::algorithm
    // anonymous namespace to hide the implementation details
    namespace
    {
-      using std::memset;
-      using std::min;
-      using std::out_of_range;
+      inline constexpr size_t MAX_LEN = 50;
+
+      // having max 50 lenght, the maximum weight can be 100 - all elements to replace
+      inline constexpr uint8_t INF = 250; // suitable for uint8_t: inf + cost < 255
 
       template <typename CharMatchPolicy>
       int distImpl(string_view a, string_view b, const CharMatchPolicy& matchPolicy)
@@ -22,10 +23,12 @@ namespace spell::algorithm
          enum op : uint8_t { MATCH_OR_SUBST, INSERT, DELETE };
 
          // to reuse the same 50x50 every time or at least comment it?
-         uint8_t dp[MAX_LEN + 1][MAX_LEN + 1][3]; // VLA or MAX_LEN ?
+         uint8_t dp[MAX_LEN + 1][MAX_LEN + 1][3]; // Otherwise, we can use VLA with a.size() and b.size()
 
 #ifdef DEBUG
-         uint8_t parent[a.size() + 1][b.size() + 1][3]{INF}; // to backtrack the operations and positions
+         // to backtrack the operations and positions
+         uint8_t bt[MAX_LEN + 1][MAX_LEN + 1][3];
+         memset(bt, INF, sizeof(bt));
 #endif
 
          memset(dp, INF, sizeof(dp));
@@ -64,8 +67,16 @@ namespace spell::algorithm
                uint8_t subs2 = dp[i - 1][j][MATCH_OR_SUBST] + 1;
                uint8_t ins2 = dp[i - 1][j][INSERT] + 1;
                dp[i][j][DELETE] = min(subs2, ins2);
+
+#ifdef DEBUG
+               // todo: to store the predecessor state that produced the minimum cost
+#endif
             }
          }
+
+#ifdef DEBUG
+         // todo: to fill the ops and call backtrackAndPrint
+#endif
 
          int distance = min({dp[a_size][b_size][MATCH_OR_SUBST], dp[a_size][b_size][INSERT], dp[a_size][b_size][DELETE]});
          return distance > 2 ? -1 : distance;
@@ -74,7 +85,6 @@ namespace spell::algorithm
 
    int dist(string_view a, string_view b, CharMatchPolicy matcher)
    {
-      using std::visit;
       // std::visit must not be called inside the implementation of distImpl, otherwise it would be called for every character
       return visit([&](const auto& policy) { return distImpl(a, b, policy); }, matcher);
    }

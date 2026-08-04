@@ -7,16 +7,10 @@
 namespace spell::algorithm
 {
    using namespace spell::text;
-
-   using std::string_view;
-
-   inline constexpr size_t MAX_LEN = 50;
-
-   // having max 50 lenght, the maximum weight can be 100 - all elements to replace
-   inline constexpr uint8_t INF = 250; // suitable for uint8_t: inf + cost < 255
+   using namespace std;
 
    /*
-      * Computes the edit distance (the weight of operations: insertion 1, deletion 1, substitution 2) between two words.
+      * Computes the edit distance https://en.wikipedia.org/wiki/Levenshtein_distance (the weight of operations: insertion 1, deletion 1, substitution 2) between two words.
       * Allowed operations: insertion, deletion, substitution (subtitution is counted as 2 operations: deletion + insertion).
       * Two consecutive insertions or deletions are not allowed.
       * Returns -1 if the distance is greater than 2.

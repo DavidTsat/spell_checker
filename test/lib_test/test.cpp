@@ -1,19 +1,14 @@
 #include "spell/algorithm.h"
 #include "spell/text_utils.h"
 
-#include <iostream>
 #include <cassert>
-#include <unordered_set>
+#include <vector>
+#include <iostream>
 
 namespace
 {
    using namespace spell::algorithm;
    using namespace spell::text;
-
-   using std::back_inserter;
-   using std::cout;
-   using std::inserter;
-   using std::vector;
 
    void testDist()
    {

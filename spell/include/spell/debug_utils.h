@@ -6,9 +6,7 @@
 
 namespace spell::debug_utils
 {
-   using std::cout;
-   using std::endl;
-   using std::string_view;
+   using namespace std;
 
    // requires
    template <typename Cont>
@@ -17,6 +15,12 @@ namespace spell::debug_utils
       for (const auto& a : cont)
          cout << a << ',';
       cout << endl;
+   }
+
+   template <size_t MAX_LEN, typename Cont>
+   void backtrackAndPrint(uint8_t (&bt)[MAX_LEN + 1][MAX_LEN + 1][3], const Cont& ops)
+   {
+      // todo: to parse the bt and print.
    }
 } // namespace spell::debug_utils
 

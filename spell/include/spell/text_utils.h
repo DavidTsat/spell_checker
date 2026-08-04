@@ -2,22 +2,16 @@
 
 #include <string>
 #include <string_view>
-#include <vector>
 #include <variant>
 
 namespace spell::text
 {
-   using std::string;
-   using std::string_view;
-   using std::vector;
-   using std::tolower;
-   using std::next;
-   using std::distance;
-   
+   using namespace std;
+
    // as this is called for every character, we better not to use type-erased polymorphic std::function or  an interface with a virtual comparator function
    struct CaseInsensitiveMatch
    {
-      inline bool operator()(char a, char b) const
+      bool operator()(char a, char b) const
       {
          return static_cast<unsigned char>(tolower(a))
              == static_cast<unsigned char>(tolower(b)); // todo to match also non-printable binary data either here, or introduce a new policy
@@ -27,7 +21,7 @@ namespace spell::text
    // as this is called for every character, we better not to use type-erased polymorphic std::function or  an interface with a virtual comparator function
    struct CaseSensitiveMatch
    {
-      inline bool operator()(char a, char b) const
+      bool operator()(char a, char b) const
       {
          return static_cast<unsigned char>(a) == static_cast<unsigned char>(b);
       }
@@ -48,7 +42,7 @@ namespace spell::text
       {
          static constexpr const char* whitespace = " \t\n\r\f\v";
 
-         auto begin = word.find_first_not_of(whitespace);
+         auto begin{word.find_first_not_of(whitespace)};
          if (begin == string_view::npos)
             return {};
 
@@ -94,7 +88,7 @@ namespace spell::text
       while (first != last)
       {
          // skip over one separator
-         if (first != last && *first == sep)
+         if (*first == sep)
             ++first;
 
          InIt f2 = first;
