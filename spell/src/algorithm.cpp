@@ -11,7 +11,7 @@ namespace spell::algorithm
       inline constexpr size_t MAX_LEN = 50;
 
       // having max 50 lenght, the maximum weight can be 100 - all elements to replace
-      inline constexpr uint8_t INF = 250; // suitable for uint8_t: inf + cost < 255
+      inline constexpr uint8_t INF = 127; // suitable for uint8_t: inf + 50 doesn't overflow uint8_t
 
       template <typename CharMatchPolicy>
       int distImpl(string_view a, string_view b, const CharMatchPolicy& matchPolicy)
