@@ -20,6 +20,7 @@ namespace spell_checker
                     WordProcesor processor, Policy policy, char sep)
    {
       // fast path, exact match
+      // if (auto it = lookup.find(word); it != lookup.cend())
       if (lookup.find(word) != lookup.cend())
          return string{word};
 
