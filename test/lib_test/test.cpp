@@ -192,14 +192,14 @@ namespace
    {
       struct TestTokenizeBasic
       {
-         void operator()(string_view input, char sep, string_view term, const vector<string_view>& expectedVoc,
+         void operator()(string_view input, string_view term, const vector<string_view>& expectedVoc,
                          const vector<string_view>& expectedWords)
          {
             vector<string_view> voc;
             vector<string_view> words;
 
-            auto it = tokenize(input.cbegin(), input.cend(), back_inserter(voc), sep, term);
-            auto endIt = tokenize(it, input.cend(), back_inserter(words), sep, term);
+            auto it = tokenize(input.cbegin(), input.cend(), back_inserter(voc), term, true);
+            tokenize(it, input.cend(), back_inserter(words), term, true);
 
             assert(voc == expectedVoc);
             assert(words == expectedWords);
@@ -208,20 +208,18 @@ namespace
 
       testTokenizeBasic(
          "rain spain plain plaint pain main mainly the in on fall falls his was===hte rame in pain fells "
-         "mainy    oon teh lain was hints pliant===",
-         ' ', "===",
+         "mainy    oon teh lain was hints pliant===", "===",
          {"rain", "spain", "plain", "plaint", "pain", "main", "mainly", "the", "in", "on", "fall", "falls", "his", "was"},
-         {"hte", "rame", "in", "pain", "fells", "mainy", "   oon", "teh", "lain", "was", "hints", "pliant"});
+         {"hte", "rame", "in", "pain", "fells", "mainy", "oon", "teh", "lain", "was", "hints", "pliant"});
 
       testTokenizeBasic(
-         "rain,spain,plain,plaint,pain,main,mainly,the,in,on,fall,falls,his,was------hte,rame,in,pain,fells,"
-         "mainy,    oon,teh,lain,was,hints,pliant------",
-         ',', "------",
+         "rain\rspain\rplain\rplaint\rpain\rmain\rmainly\nthe\f\n\f\v in\ron fall falls his\twas------hte rame\rin pain\ffells\f"
+         "mainy \n\r    oon\nteh\flain was\thints pliant------", "------",
          {"rain", "spain", "plain", "plaint", "pain", "main", "mainly", "the", "in", "on", "fall", "falls", "his", "was"},
-         {"hte", "rame", "in", "pain", "fells", "mainy", "    oon", "teh", "lain", "was", "hints", "pliant"});
+         {"hte", "rame", "in", "pain", "fells", "mainy", "oon", "teh", "lain", "was", "hints", "pliant"});
 
-      testTokenizeBasic("hello === ===", ' ', "===", {"hello"}, {});
-      testTokenizeBasic("======", ' ', "===", {}, {});
+      testTokenizeBasic("hello === ===", "===", {"hello"}, {});
+      testTokenizeBasic("======", "===", {}, {});
 
       cout << "All tokenize tests passed!\n";
    }

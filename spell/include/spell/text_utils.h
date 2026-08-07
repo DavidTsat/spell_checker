@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 #include <variant>
+#include <cctype>
 
 namespace spell::text
 {
@@ -50,31 +51,37 @@ namespace spell::text
          return hash<string_view>{}(s);
       }
    };
-   
+
    using CharMatchPolicy = variant<struct CaseInsensitiveMatch, struct CaseSensitiveMatch>;
 
-   // pre and post processor: left trim whitespaces
+   // pre and post processor: left trim whitespaces while preserving the original prefix
    struct LTrimWhitespace
    {
       struct Result
       {
-         string_view trimmed;
-         string_view prefix;
+         string trimmed;
+         string prefix;
       };
 
       Result preprocess(string_view word) const
       {
-         static constexpr const char* whitespace = " \t\n\r\f\v";
+         size_t i = 0;
+         while (i != word.size() && isspace(static_cast<unsigned char>(word[i])))
+            ++i;
 
-         auto begin{word.find_first_not_of(whitespace)};
-         if (begin == string_view::npos)
-            return {};
-
-         return {word.substr(begin), word.substr(0, begin)};
+         return {string(word.substr(i)), string(word.substr(0, i))};
       }
 
       string postprocess(string_view prefix, string_view word) const
       {
+         // if (!word.empty() && word[0] == '{')
+         // {
+         //    if (prefix.empty())
+         //       return string(word);
+
+         //    return string(1, prefix[0]) + "{" + string(prefix.substr(1)) + string(word.substr(1));
+         // }
+
          return string(prefix) + string(word);
       }
    };
@@ -107,18 +114,24 @@ namespace spell::text
    }
 
    template <typename InIt, typename OutIt>
-   InIt tokenize(InIt first, InIt last, OutIt dest, char sep, string_view term)
+   InIt tokenize(InIt first, InIt last, OutIt dest, string_view term, bool skipAllLeadingSeps = false)
    {
       while (first != last)
       {
-         // skip over one separator
-         if (*first == sep)
-            ++first;
+         if (skipAllLeadingSeps)
+         {
+            while (first != last && isspace(static_cast<unsigned char>((*first))))
+               ++first;
 
+            if (first == last)
+               break;
+         }
+         else if (isspace(static_cast<unsigned char>((*first))))
+            ++first;
          InIt f2 = first;
-         while (f2 != last && *f2 == sep)
+         while (f2 != last && isspace(static_cast<unsigned char>(*f2)))
             ++f2;
-         while (f2 != last && *f2 != sep)
+         while (f2 != last && !isspace(static_cast<unsigned char>(*f2)))
             ++f2;
 
          string_view currWord{first, f2};

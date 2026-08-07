@@ -109,8 +109,8 @@ namespace spell_checker
       template <typename It>
       void initData(It first, It last, std::string_view term)
       {
-         auto it = tokenize(first, last, std::back_inserter(mVocLinear), mSep, term);
-         tokenize(it, last, std::back_inserter(mWords), mSep, term);
+         auto it = tokenize(first, last, std::back_inserter(mVocLinear), term, true);
+         tokenize(it, last, std::back_inserter(mWords), term);
 
          mVocLookup.reserve(mVocLinear.size());
          mVocLookup.insert(mVocLinear.cbegin(), mVocLinear.cend());
