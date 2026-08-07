@@ -15,15 +15,14 @@ namespace spell_checker
    using namespace spell::algorithm;
    using namespace spell::text;
 
-   template <typename WordProcesor>
-   string checkImpl(const unordered_set<string_view>& lookup, const vector<string_view>& vocabulary, string_view word,
-                    WordProcesor processor, char sep)
+   template <typename WordProcesor, typename LookupCont, typename Policy>
+   string checkImpl(const LookupCont& lookup, const vector<string_view>& vocabulary, string_view word,
+                    WordProcesor processor, Policy policy, char sep)
    {
       // fast path, exact match
       if (lookup.find(word) != lookup.cend())
          return string{word};
 
-      // to do: to optimize
       vector<string> d1, d2;
       for (string_view vocWord : vocabulary)
       {
@@ -34,7 +33,7 @@ namespace spell_checker
          if (abs((int)vocWord.size() - (int)processedWord.size()) > 2)
             continue;
 
-         int d = dist(vocWord, processedWord);
+         int d = dist(vocWord, processedWord, policy);
          if (d == -1)
             continue;
 
@@ -53,15 +52,16 @@ namespace spell_checker
    }
 
    SpellChecker::SpellChecker(string_view inputSeq, char sep, string_view term) :
-      pImpl{std::make_unique<SpellCheckerImpl>(inputSeq, sep, term)}
+      pImpl{make_unique<SpellCheckerImpl<CaseInsensitiveMatch>>(inputSeq, sep, term)}
    {}
 
    SpellChecker::SpellChecker(ifstream& instream, char sep, string_view term) :
-      pImpl{std::make_unique<SpellCheckerImpl>(instream, sep, term)}
+      pImpl{make_unique<SpellCheckerImpl<CaseInsensitiveMatch>>(instream, sep, term)}
    {}
 
    SpellChecker::~SpellChecker() = default;
 
+   template <typename CharMatchPolicy>
    class SpellChecker::SpellCheckerImpl
    {
    public:
@@ -95,7 +95,8 @@ namespace spell_checker
          string r;
          for (auto it = mWords.cbegin(); it != mWords.cend(); ++it)
          {
-            r += checkImpl<LTrimWhitespace>(mVocLookup, mVocLinear, *it, LTrimWhitespace{}, mSep);
+            r += checkImpl(mVocLookup, mVocLinear, *it, LTrimWhitespace{}, CharMatchPolicy{}, mSep);
+            
             if (it != prev(mWords.cend()))
                r += mSep;
          }
@@ -118,7 +119,7 @@ namespace spell_checker
       vector<char> mFileBuffer;
       vector<string_view> mVocLinear;        // to keep the original order of the vocabulary
       vector<string_view> mWords;            // to check the iterators invalidation
-      unordered_set<string_view> mVocLookup; // for fast lookup for exact matches
+      unordered_set<string_view, CharMatchPolicy, CharMatchPolicy> mVocLookup; // for fast lookup for exact matches
    };
 
    string SpellChecker::check() const

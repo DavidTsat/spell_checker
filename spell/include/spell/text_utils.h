@@ -8,26 +8,50 @@ namespace spell::text
 {
    using namespace std;
 
-   // as this is called for every character, we better not to use type-erased polymorphic std::function or  an interface with a virtual comparator function
    struct CaseInsensitiveMatch
    {
       bool operator()(char a, char b) const
       {
-         return static_cast<unsigned char>(tolower(a))
-             == static_cast<unsigned char>(tolower(b)); // todo to match also non-printable binary data either here, or introduce a new policy
+         return static_cast<unsigned char>(tolower(a)) == static_cast<unsigned char>(tolower(b));
+      }
+
+      bool operator()(string_view a, string_view b) const
+      {
+         if (a.size() != b.size())
+            return false;
+
+         return equal(a.begin(), a.end(), b.begin(), *this);
+      }
+
+      size_t operator()(string_view s) const
+      {
+         size_t h = 0;
+         for (char c : s)
+            h = h * 31 + static_cast<unsigned char>(tolower(c));
+
+         return h;
       }
    };
 
-   // as this is called for every character, we better not to use type-erased polymorphic std::function or  an interface with a virtual comparator function
    struct CaseSensitiveMatch
    {
       bool operator()(char a, char b) const
       {
          return static_cast<unsigned char>(a) == static_cast<unsigned char>(b);
       }
-   };
 
-   using CharMatchPolicy = std::variant<struct CaseInsensitiveMatch, struct CaseSensitiveMatch>;
+      bool operator()(string_view a, string_view b) const
+      {
+         return a == b;
+      }
+
+      size_t operator()(string_view s) const
+      {
+         return hash<string_view>{}(s);
+      }
+   };
+   
+   using CharMatchPolicy = variant<struct CaseInsensitiveMatch, struct CaseSensitiveMatch>;
 
    // pre and post processor: left trim whitespaces
    struct LTrimWhitespace
@@ -99,7 +123,7 @@ namespace spell::text
 
          string_view currWord{first, f2};
 
-         if (std::size_t e = currWord.find(term); e != string_view::npos)
+         if (size_t e = currWord.find(term); e != string_view::npos)
          {
             if (!(e == 0))
                *dest = string_view{currWord.data(), e};

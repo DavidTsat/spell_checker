@@ -8,8 +8,6 @@
 
 namespace spell_checker
 {
-   using namespace std;
-
    class SpellChecker
    {
    public:
@@ -19,15 +17,17 @@ namespace spell_checker
       SpellChecker& operator=(const SpellChecker&) = delete;
       SpellChecker& operator=(SpellChecker&&) = delete;
 
-      explicit SpellChecker(string_view inputSeq, char sep = ' ', string_view term = "===");
-      explicit SpellChecker(ifstream& instream, char sep = ' ', string_view term = "===");
+      explicit SpellChecker(std::string_view inputSeq, char sep = ' ', std::string_view term = "===");
+      explicit SpellChecker(std::ifstream& instream, char sep = ' ', std::string_view term = "===");
 
       ~SpellChecker();
 
-      string check() const;
+      std::string check() const;
 
    private:
+      template <typename CharMatchPolicy>
       class SpellCheckerImpl;
-      unique_ptr<SpellCheckerImpl> pImpl;
+
+      std::unique_ptr<SpellCheckerImpl<spell::text::CaseInsensitiveMatch>> pImpl;
    };
 } // namespace spell_checker

@@ -26,6 +26,10 @@ namespace
          {
             SpellChecker checker{inFile};
 
+            cout << endl;
+            cout <<checker.check() <<endl;
+            cout << expRes << endl;
+            cout << endl;
             assert(checker.check() == expRes);
          }
       };
@@ -98,8 +102,8 @@ namespace
       test(infile, "{abc a} abc abc aabc aa aa aa bbbbb {bbbbbee?} bbbbb bbbkkkkk bbbkkkkk bbbkkkkk bubbbb {mmmmm mmmnk mmamk mqmmk ambmmmk mmm immummk}");
       infile.close();
 
-      infile.open("../test/app_test/in_file3.txt");
-      test(infile, "{abc a} abc abc aabc aa aa aa bbbbb {bbbbbee?} bbbbb bbbkkkkk bbbkkkkk bbbkkkkk bubbbb {mmmmm mmmnk mmamk mqmmk ambmmmk mmm immummk}");
+      infile.open("../test/app_test/in_file4.txt");
+      test(infile, "the {rame?} in paiN falls {main mainly}    on the Plain was {hinTS?} plaint");
       infile.close();
 
       cout << "All spellChecker tests passed!\n";
