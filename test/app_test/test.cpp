@@ -3,6 +3,8 @@
 #include <string_view>
 #include <iostream>
 #include <cassert>
+#include <fstream>
+#include <string>
 
 namespace
 {
@@ -16,6 +18,13 @@ namespace
          void operator()(string_view input, string_view expRes)
          {
             SpellChecker checker{input};
+
+            assert(checker.check() == expRes);
+         }
+
+         void operator()(ifstream& inFile, string_view expRes)
+         {
+            SpellChecker checker{inFile};
 
             assert(checker.check() == expRes);
          }
@@ -73,6 +82,25 @@ namespace
 
       // both empty with opening and closing terminal sequence
       test("======", "");
+
+
+      // input file tests
+
+      ifstream infile{"../test/app_test/in_file1.txt"};
+      test(infile, "the {rame?} in pain falls {main mainly}    on the plain was {hints?} plaint");
+      infile.close();
+
+      infile.open("../test/app_test/in_file2.txt");
+      test(infile, "");
+      infile.close();
+
+      infile.open("../test/app_test/in_file3.txt");
+      test(infile, "{abc a} abc abc aabc aa aa aa bbbbb {bbbbbee?} bbbbb bbbkkkkk bbbkkkkk bbbkkkkk bubbbb {mmmmm mmmnk mmamk mqmmk ambmmmk mmm immummk}");
+      infile.close();
+
+      infile.open("../test/app_test/in_file3.txt");
+      test(infile, "{abc a} abc abc aabc aa aa aa bbbbb {bbbbbee?} bbbbb bbbkkkkk bbbkkkkk bbbkkkkk bubbbb {mmmmm mmmnk mmamk mqmmk ambmmmk mmm immummk}");
+      infile.close();
 
       cout << "All spellChecker tests passed!\n";
    }

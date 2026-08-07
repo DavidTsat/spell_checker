@@ -67,6 +67,8 @@ namespace
    
              == -1); // the symmetric case
 
+      assert(dist("aa", "aaaa") == 2);
+
       assert(dist("", "") == 0);
       assert(dist("", "k") == 1);
       assert(dist("", "kk") == -1);

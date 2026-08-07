@@ -1,8 +1,10 @@
 #include "spell_checker.h"
 #include "spell/algorithm.h"
 
+#include <iterator>
 #include <vector>
 #include <unordered_set>
+#include <string>
 
 #ifdef DEBUG
 #include "spell/debug_utils.h"
@@ -54,28 +56,42 @@ namespace spell_checker
       pImpl{std::make_unique<SpellCheckerImpl>(inputSeq, sep, term)}
    {}
 
+   SpellChecker::SpellChecker(ifstream& instream, char sep, string_view term) :
+      pImpl{std::make_unique<SpellCheckerImpl>(instream, sep, term)}
+   {}
+
    SpellChecker::~SpellChecker() = default;
 
    class SpellChecker::SpellCheckerImpl
    {
    public:
+      SpellCheckerImpl(const SpellCheckerImpl&) = delete;
+      SpellCheckerImpl(SpellCheckerImpl&&) = delete;
+
+      SpellCheckerImpl& operator=(const SpellCheckerImpl&) = delete;
+      SpellCheckerImpl& operator=(SpellCheckerImpl&&) = delete;
+
       explicit SpellCheckerImpl(string_view inputSeq, char sep, string_view term) :
          mSep(sep)
       {
-         auto it{tokenize(inputSeq.cbegin(), inputSeq.cend(), back_inserter(mVocLinear), mSep, term)};
-         auto endIt{tokenize(it, inputSeq.cend(), back_inserter(mWords), mSep, term)};
+         initData(inputSeq.cbegin(), inputSeq.cend(), term);
+      }
 
-#ifdef DEBUG
-         // todo
-#endif
+      explicit SpellCheckerImpl(ifstream& infile, char sep, string_view term) :
+         mSep(sep)
+      {
+         if (!infile.is_open())
+            throw runtime_error("File error!");
 
-         // todo: to check the returned values
-         mVocLookup.reserve(mVocLinear.size());
-         mVocLookup.insert(mVocLinear.cbegin(), mVocLinear.cend());
+         mFileBuffer.assign(istreambuf_iterator<char>(infile), istreambuf_iterator<char>());
+         initData(mFileBuffer.cbegin(), mFileBuffer.cend(), term);
       }
 
       string check() const
       {
+         if (mWords.empty())
+            return {};
+
          string r;
          for (auto it = mWords.cbegin(); it != mWords.cend(); ++it)
          {
@@ -88,7 +104,18 @@ namespace spell_checker
       }
 
    private:
+      template <typename It>
+      void initData(It first, It last, std::string_view term)
+      {
+         auto it = tokenize(first, last, std::back_inserter(mVocLinear), mSep, term);
+         tokenize(it, last, std::back_inserter(mWords), mSep, term);
+
+         mVocLookup.reserve(mVocLinear.size());
+         mVocLookup.insert(mVocLinear.cbegin(), mVocLinear.cend());
+      }
+
       char mSep;
+      vector<char> mFileBuffer;
       vector<string_view> mVocLinear;        // to keep the original order of the vocabulary
       vector<string_view> mWords;            // to check the iterators invalidation
       unordered_set<string_view> mVocLookup; // for fast lookup for exact matches
