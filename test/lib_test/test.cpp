@@ -64,7 +64,7 @@ namespace
              == -1); // all characters different, but the algorithm must compute till the end
       assert(dist("01234567890123456789012345678901234567890123456789",
                   "98765432109876543210987654321098765432109876543210")
-   
+
              == -1); // the symmetric case
 
       assert(dist("aa", "aaaa") == 2);
@@ -119,11 +119,18 @@ namespace
       assert(dist("012345678901234567890123456789012345678901", "01234567890123456789012345678901234567890155") == -1);
       assert(dist("0123456789012345678901234567890123456789012", "012345678901234567890123456789012345678901255") == -1);
       assert(dist("01234567890123456789012345678901234567890123", "0123456789012345678901234567890123456789012355") == -1);
-      assert(dist("012345678901234567890123456789012345678901234", "01234567890123456789012345678901234567890123455") == -1);
-      assert(dist("0123456789012345678901234567890123456789012345", "012345678901234567890123456789012345678901234555") == 2); // the same as above
-      assert(dist("0123456789012345678901234567890123456789012344", "012345678901234567890123456789012345678901234455") == -1); 
-      assert(dist("01234567890123456789012345678901234567890123456", "0123456789012345678901234567890123456789012345655") == -1);
-      assert(dist("012345678901234567890123456789012345678901234567", "01234567890123456789012345678901234567890123456755") == -1);
+      assert(dist("012345678901234567890123456789012345678901234", "01234567890123456789012345678901234567890123455")
+             == -1);
+      assert(dist("0123456789012345678901234567890123456789012345", "012345678901234567890123456789012345678901234555")
+             == 2); // the same as above
+      assert(dist("0123456789012345678901234567890123456789012344", "012345678901234567890123456789012345678901234455")
+             == -1);
+      assert(dist("01234567890123456789012345678901234567890123456",
+                  "0123456789012345678901234567890123456789012345655")
+             == -1);
+      assert(dist("012345678901234567890123456789012345678901234567",
+                  "01234567890123456789012345678901234567890123456755")
+             == -1);
 
       // TODO: the policy classes must be enhanced
       // Latin-1/ISO 8859-1 (extended ASCII) strings
@@ -199,7 +206,20 @@ namespace
             vector<string_view> words;
 
             auto it = tokenize(input.cbegin(), input.cend(), back_inserter(voc), term, true);
-            tokenize(it, input.cend(), back_inserter(words), term, true);
+            tokenize(it, input.cend(), back_inserter(words), term, false);
+
+            assert(voc == expectedVoc);
+            assert(words == expectedWords);
+         }
+
+         void operator()(string_view input, string_view term, const vector<string_view>& expectedVoc,
+                         const vector<pair<string_view, string_view>>& expectedWords)
+         {
+            vector<string_view> voc;
+            vector<pair<string_view, string_view>> words;
+
+            auto it = tokenize(input.cbegin(), input.cend(), back_inserter(voc), term, true);
+            tokenize<true>(it, input.cend(), back_inserter(words), term, false);
 
             assert(voc == expectedVoc);
             assert(words == expectedWords);
@@ -208,18 +228,64 @@ namespace
 
       testTokenizeBasic(
          "rain spain plain plaint pain main mainly the in on fall falls his was===hte rame in pain fells "
-         "mainy    oon teh lain was hints pliant===", "===",
+         "mainy    oon teh lain was hints pliant===",
+         "===",
          {"rain", "spain", "plain", "plaint", "pain", "main", "mainly", "the", "in", "on", "fall", "falls", "his", "was"},
          {"hte", "rame", "in", "pain", "fells", "mainy", "oon", "teh", "lain", "was", "hints", "pliant"});
+
+      testTokenizeBasic("rain\rspain\rplain\rplaint\rpain\rmain\rmainly\nthe\f\n\f\v in\ron fall falls "
+                        "his\twas------hte rame\rin pain\ffells\f"
+                        "mainy \n\r    oon\nteh\flain was\thints pliant------",
+                        "------",
+                        {"rain", "spain", "plain", "plaint", "pain", "main", "mainly", "the", "in", "on", "fall",
+                         "falls", "his", "was"},
+                        {"hte", "rame", "in", "pain", "fells", "mainy", "oon", "teh", "lain", "was", "hints", "pliant"});
 
       testTokenizeBasic(
-         "rain\rspain\rplain\rplaint\rpain\rmain\rmainly\nthe\f\n\f\v in\ron fall falls his\twas------hte rame\rin pain\ffells\f"
-         "mainy \n\r    oon\nteh\flain was\thints pliant------", "------",
-         {"rain", "spain", "plain", "plaint", "pain", "main", "mainly", "the", "in", "on", "fall", "falls", "his", "was"},
-         {"hte", "rame", "in", "pain", "fells", "mainy", "oon", "teh", "lain", "was", "hints", "pliant"});
+         "rain spain plain plaint pain main mainly the in on fall falls his was===hte rame in pain fells "
+         "mainy    oon teh lain was hints pliant===",
+         "===",
+         {
+            "rain", "spain", "plain", "plaint", "pain", "main", "mainly", "the", "in", "on", "fall", "falls", "his", "was"
+      },
+         vector<pair<string_view, string_view>>{
+            {"hte", ""},
+            {"rame", " "},
+            {"in", " "},
+            {"pain", " "},
+            {"fells", " "},
+            {"mainy", " "},
+            {"oon", "    "},
+            {"teh", " "},
+            {"lain", " "},
+            {"was", " "},
+            {"hints", " "},
+            {"pliant", " "}});
 
-      testTokenizeBasic("hello === ===", "===", {"hello"}, {});
-      testTokenizeBasic("======", "===", {}, {});
+      testTokenizeBasic(
+         "rain\rspain\rplain\rplaint\rpain\rmain\rmainly\nthe\f\n\f\v in\ron fall falls his\twas------hte rame\rin "
+         "pain\ffells\f"
+         "mainy \n\r    oon\nteh\flain was\thints pliant------",
+         "------",
+         {
+            "rain", "spain", "plain", "plaint", "pain", "main", "mainly", "the", "in", "on", "fall", "falls", "his", "was"
+      },
+         vector<pair<string_view, string_view>>{
+            {"hte", ""},
+            {"rame", " "},
+            {"in", "\r"},
+            {"pain", " "},
+            {"fells", "\f"},
+            {"mainy", "\f"},
+            {"oon", " \n\r    "},
+            {"teh", "\n"},
+            {"lain", "\f"},
+            {"was", " "},
+            {"hints", "\t"},
+            {"pliant", " "}});
+
+      testTokenizeBasic("hello === ===", "===", {"hello"}, vector<string_view>{});
+      testTokenizeBasic("======", "===", {}, vector<string_view>{});
 
       cout << "All tokenize tests passed!\n";
    }
@@ -229,7 +295,7 @@ namespace
 int main()
 {
    testDist();
-   // testPrePostProcessor(); // to remove
+   testPrePostProcessor(); // to remove
    testFormat();
    testTokenize();
 

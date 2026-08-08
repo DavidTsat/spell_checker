@@ -25,7 +25,7 @@ namespace spell::text
          return equal(a.begin(), a.end(), b.begin(), *this);
       }
 
-      size_t operator()(string_view s) const
+      size_t operator()(string_view s) const // simple hash to fulfill the equality
       {
          size_t h = 0;
          for (char c : s)
@@ -165,7 +165,7 @@ namespace spell::text
 
          if (tokenStart == wordEnd)
             break;
-
+         
          string_view prefix{&*tokenStart, static_cast<size_t>(distance(tokenStart, wordStart))};
          string_view currWord{&*wordStart, static_cast<size_t>(distance(wordStart, wordEnd))};
 
