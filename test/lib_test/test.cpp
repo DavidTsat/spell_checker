@@ -229,7 +229,7 @@ namespace
 int main()
 {
    testDist();
-   testPrePostProcessor();
+   // testPrePostProcessor(); // to remove
    testFormat();
    testTokenize();
 

@@ -4,6 +4,7 @@
 #include <string_view>
 #include <variant>
 #include <cctype>
+#include <iterator>
 
 namespace spell::text
 {
@@ -54,7 +55,28 @@ namespace spell::text
 
    using CharMatchPolicy = variant<struct CaseInsensitiveMatch, struct CaseSensitiveMatch>;
 
-   // pre and post processor: left trim whitespaces while preserving the original prefix
+   template <typename InIt>
+   size_t getSepLen(InIt first, InIt last)
+   {
+      if (first == last)
+         return 0;
+
+      if (isspace(static_cast<unsigned char>(*first)))
+         return 1;
+
+      if (*first == '\\')
+      {
+         auto nextIt = next(first);
+         if (nextIt != last)
+         {
+            char c = *nextIt;
+            if (c == 'r' || c == 'n' || c == 't' || c == 'f' || c == 'v') // the same characters checked by isspace
+               return 2;
+         }
+      }
+      return 0;
+   }
+
    struct LTrimWhitespace
    {
       struct Result
@@ -74,14 +96,6 @@ namespace spell::text
 
       string postprocess(string_view prefix, string_view word) const
       {
-         // if (!word.empty() && word[0] == '{')
-         // {
-         //    if (prefix.empty())
-         //       return string(word);
-
-         //    return string(1, prefix[0]) + "{" + string(prefix.substr(1)) + string(word.substr(1));
-         // }
-
          return string(prefix) + string(word);
       }
    };
@@ -94,11 +108,11 @@ namespace spell::text
          if (begin == end)
             return string{};
 
-         string res{*begin};
+         string res{string(*begin)};
          for (auto it = next(begin); it != end; ++it)
          {
             res += sep;
-            res += *it;
+            res += string(*it);
          }
 
          if (distance(begin, end) > 1)
@@ -113,40 +127,68 @@ namespace spell::text
       return join(beginD2, endD2, string(1, sep));
    }
 
-   template <typename InIt, typename OutIt>
+   template <bool StorePrefix = false, typename InIt, typename OutIt>
    InIt tokenize(InIt first, InIt last, OutIt dest, string_view term, bool skipAllLeadingSeps = false)
    {
       while (first != last)
       {
          if (skipAllLeadingSeps)
          {
-            while (first != last && isspace(static_cast<unsigned char>((*first))))
-               ++first;
-
+            while (first != last)
+            {
+               size_t len = getSepLen(first, last);
+               if (len == 0)
+                  break;
+               advance(first, len);
+            }
             if (first == last)
                break;
          }
-         else if (isspace(static_cast<unsigned char>((*first))))
-            ++first;
-         InIt f2 = first;
-         while (f2 != last && isspace(static_cast<unsigned char>(*f2)))
-            ++f2;
-         while (f2 != last && !isspace(static_cast<unsigned char>(*f2)))
-            ++f2;
 
-         string_view currWord{first, f2};
+         InIt tokenStart = first;
+
+         if (!skipAllLeadingSeps)
+         {
+            while (first != last)
+            {
+               size_t len = getSepLen(first, last);
+               if (len == 0)
+                  break;
+               advance(first, len);
+            }
+         }
+
+         InIt wordStart = first;
+         InIt wordEnd = first;
+         while (wordEnd != last && getSepLen(wordEnd, last) == 0)
+            ++wordEnd;
+
+         if (tokenStart == wordEnd)
+            break;
+
+         string_view prefix{&*tokenStart, static_cast<size_t>(distance(tokenStart, wordStart))};
+         string_view currWord{&*wordStart, static_cast<size_t>(distance(wordStart, wordEnd))};
 
          if (size_t e = currWord.find(term); e != string_view::npos)
          {
-            if (!(e == 0))
-               *dest = string_view{currWord.data(), e};
-            first = first + e + term.size();
+            if (e > 0)
+            {
+               string_view trimmedWord = currWord.substr(0, e);
+               if constexpr (StorePrefix)
+                  *dest = make_pair(trimmedWord, prefix);
+               else
+                  *dest = trimmedWord;
+            }
+            first = wordStart + e + term.size();
             break;
          }
 
-         *dest = currWord;
+         if constexpr (StorePrefix)
+            *dest = make_pair(currWord, prefix);
+         else
+            *dest = currWord;
 
-         first = f2;
+         first = wordEnd;
       }
 
       return first;

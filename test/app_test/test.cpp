@@ -61,8 +61,8 @@ namespace
       test("01234567890123456789012345678901234567890123456789===0123456789012345678901234567890123456789012345678",
            "01234567890123456789012345678901234567890123456789");
 
-      // separators (spaces) must be preserved
-      test("rain plain pain===hte   rame   aaaaa", "{hte?} {  rame?} {  aaaaa?}");
+      // separators must be preserved outside of {}
+      test("rain plain pain===hte   rame   aaaaa", "{hte?}   {rame?}   {aaaaa?}");
 
       // several dist 2 candidates
       test("abcde abceq bbcee===abcee", "{abcde abceq bbcee}");
@@ -84,7 +84,6 @@ namespace
       // both empty with opening and closing terminal sequence
       test("======", "");
 
-
       // input file tests
 
       ifstream infile{"../test/app_test/in_file1.txt"};
@@ -103,9 +102,10 @@ namespace
       test(infile, "the {rame?} in paiN falls {main mainly}    on the Plain was {hinTS?} plaint abcd wOrk");
       infile.close();
 
-      // infile.open("../test/app_test/in_file5.txt");
-      // test(infile, "the {rame?} in paiN falls {main mainly}    on the Plain was {hinTS?} plaint abcd wOrk");
-      // infile.close();
+      infile.open("../test/app_test/in_file5.txt");
+      test(infile, R"(the {rame?}\rin pain\ffalls\f{main mainly}    on\nthe\f plain was\t{hints?} plAint)");
+
+      infile.close();
 
       cout << "All spellChecker tests passed!\n";
    }
